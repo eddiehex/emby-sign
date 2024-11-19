@@ -1,0 +1,6 @@
+.env
+venv
+.DS_Store
+src/log
+src/__pycache__
+src/my_account.session
