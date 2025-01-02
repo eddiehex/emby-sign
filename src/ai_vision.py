@@ -2,7 +2,10 @@ import os
 from openai import OpenAI
 import base64
 from utils.logger import setup_logger
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 class ImageAnalyzer:
     def __init__(self):
         self.logger = setup_logger('ImageAnalyzer')
@@ -31,7 +34,7 @@ class ImageAnalyzer:
             self.logger.debug(f"使用提示: {prompt}")
             
             response = self.client.chat.completions.create(
-                model="grok-vision-beta",
+                model="gpt-4o-mini",
                 messages=[
                     {
                         "role": "user",
