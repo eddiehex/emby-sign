@@ -28,8 +28,8 @@ class TerminusCheckin:
         self.logger = setup_logger('TerminusCheckin')
         
         # 直接设置 API 配置
-        self.api_id = 27298067  # 整数类型
-        self.api_hash = "2abb9ab6deab9f69a1fc68ec76efcc07"
+        self.api_id = os.getenv('TELEGRAM_API_ID') # 整数类型
+        self.api_hash = os.getenv('TELEGRAM_API_HASH')
         
         self.bot_username = "EmbyPublicBot"
         self.image_analyzer = ImageAnalyzer()
