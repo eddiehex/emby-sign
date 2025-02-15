@@ -32,6 +32,7 @@ class TerminusCheckin:
         self.api_hash = os.getenv('TELEGRAM_API_HASH')
         
         self.bot_username = "EmbyPublicBot"
+        self.bot_username_july = "NASTOOL7_bot"
         self.image_analyzer = ImageAnalyzer()
         self.client = None
         
@@ -134,7 +135,6 @@ class TerminusCheckin:
             bot = await self.client.get_users(self.bot_username)
             await self.client.send_message(bot.id, "/checkin")
             self.logger.info("已发送签到命令")
-            
             async def wait_for_response():
                 async for message in self.client.get_chat_history(bot.id, limit=1):
                     if message.photo:
@@ -160,13 +160,61 @@ class TerminusCheckin:
             self.logger.error(f"签到过程出错: {str(e)}")
             return False
 
+    async def perform_july_checkin(self):
+        """执行July bot签到流程"""
+        try:
+            self.logger.info("开始执行July bot签到流程")
+            
+            bot = await self.client.get_users(self.bot_username_july)
+            await self.client.send_message(bot.id, "/start")
+            self.logger.info("已发送start命令到July bot")
+
+            # 等待并处理响应
+            async def wait_for_keyboard():
+                async for message in self.client.get_chat_history(bot.id, limit=1):
+                    if message.reply_markup:
+                        return message
+                return None
+
+            # 等待响应最多5次
+            for attempt in range(5):
+                self.logger.debug(f"等待July bot响应，尝试 {attempt + 1}/5")
+                await asyncio.sleep(2)
+                response = await wait_for_keyboard()
+                
+                if response and response.reply_markup:
+                    # 查找包含"签到"的按钮
+                    for row in response.reply_markup.inline_keyboard:
+                        for button in row:
+                            if "签到" in button.text:
+                                try:
+                                    await response.click(button.text)
+                                    self.logger.info("July bot签到成功点击")
+                                    return True
+                                except RPCError as e:
+                                    self.logger.error(f"July bot按钮点击失败: {e}")
+                                    return False
+                    
+                    self.logger.warning("未找到签到按钮")
+                    return False
+
+            self.logger.warning("July bot签到失败")
+            return False
+
+        except Exception as e:
+            self.logger.error(f"July bot签到过程出错: {str(e)}")
+            return False
+
 async def main():
     logger = setup_logger('main')
     checkin = TerminusCheckin()
     try:
         logger.info("开始签到程序")
         await checkin.start()
+        # 执行两个签到
         await checkin.perform_checkin()
+        await asyncio.sleep(2)  # 两次签到之间稍作延迟
+        await checkin.perform_july_checkin()
     except Exception as e:
         logger.error(f"程序执行出错: {str(e)}")
     finally:
