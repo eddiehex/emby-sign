@@ -34,7 +34,7 @@ class ImageAnalyzer:
             self.logger.debug(f"使用提示: {prompt}")
             
             response = self.client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="grok-2-vision-1212",
                 messages=[
                     {
                         "role": "user",
